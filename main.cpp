@@ -14,6 +14,9 @@ using namespace std;
 
 int main()
 {
+    char command[1000];
+    sprintf(command, "mode con cols=%d lines=%d", scr_width,scr_height);
+    system(command);
 	cout << "hi\n";
 	return 0;
 }
