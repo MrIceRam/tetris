@@ -48,6 +48,12 @@ public:
 		}
 	}
 
+	void moveUp() {
+		for (int i = 0; i < vec.size(); i++) {
+			vec[i].y--;
+		}
+	}
+
 	void moveLeft() {
 		for (int i = 0; i < vec.size(); i++) {
 			vec[i].x--;
@@ -61,6 +67,33 @@ public:
 
 		}
 	}
+
+	bool isCollision(const vector <vector <int>> &vec2d) {
+		for (int i = 0; i < vec.size(); i++) {
+			if (vec2d[vec[i].y][vec[i].x] == 1) // столкновение с границей
+				return true;
+			if (vec2d[vec[i].y][vec[i].x] == 2) // столкновение с фингурой
+				return true;
+		}
+		return false;
+	}
+
+
+	void fixed(vector <vector <int>>& vec2d) {
+		for (int i = 0; i < vec.size(); i++) {
+			vec2d[vec[i].y][vec[i].x] = 2;
+
+		}
+	}
+
+	void spawn() { // фигура пока что только квадрат
+		vec.clear();
+		this->push(4, 0);
+		this->push(5, 0);
+		this->push(4, 1);
+		this->push(5, 1);
+	}
+	
 };
 
 class Game {
@@ -90,33 +123,25 @@ public:
 		vec.push_back(temp);
 	}
 
-	//void showField() {
-	//	for (int i = 0; i < 15; i++) {
-	//		cout << "#" << endl;
-	//	}
-	//	for (int i = 0; i < 20; i++) {
-	//		cout << "#";
-	//	}
-	//	for (int i = 0; i < 15; i++) {
-	//		gotoxy(19, i);
-	//		cout << "#" << endl;
-	//	}
-	//}
-
 	void showField(const vector <vector<int>>& vec) {
 
 		// Для отладки
-		//for (int i = 0; i < vec.size(); i++) {
-		//	for (int j = 0; j < vec[i].size(); j++) {
-		//		cout << vec[i][j];
-		//	}
-		//	cout << endl;
-		//}
+		for (int i = 0; i < vec.size(); i++) {
+			gotoxy(19, i);
+			for (int j = 0; j < vec[i].size(); j++) {
+				cout << vec[i][j];
+			}
+			cout << endl;
+		}
 
 		for (int i = 0; i < vec.size(); i++) {
+			gotoxy(0, i);
 			for (int j = 0; j < vec[i].size(); j++) {
 				if (vec[i][j] == 1) {
 					cout << "#";
+				}
+				if (vec[i][j] == 2) {
+					cout << "@";
 				}
 				if (vec[i][j] == 0) {
 					cout << " ";
@@ -131,12 +156,7 @@ public:
 		showField(vec);
 
 		Figure fig;
-		fig.push(4,0);
-		fig.push(5, 0);
-		fig.push(4, 1);
-		fig.push(5, 1);
-
-
+		fig.spawn();
 
 		int ch = 0;
 		int i = 0;
@@ -147,6 +167,12 @@ public:
 				fig.hide();
 				
 				fig.moveDown();
+				if (fig.isCollision(vec)) {
+					fig.moveUp();
+					fig.fixed(vec);
+					showField(vec);
+					fig.spawn();
+				}
 				fig.show();
 				Sleep(200);
 				
@@ -154,9 +180,10 @@ public:
 			}
 
 			ch = _getch();
-
+			
+			// Понять под каким номером находиться стрелки (влево, вправо, верх, вниз)
 			//if (ch == 224) {
-			//	ch = _getch();
+			//	ch = _getch(); 
 			//	gotoxy(20, 20);
 			//	//cout << ch;
 			//}
@@ -165,6 +192,9 @@ public:
 			case 77: // вправо
 				fig.hide();
 				fig.moveRight();
+				if (fig.isCollision(vec) ) {
+					fig.moveLeft();
+				}
 				break;
 			}
 			switch (ch) {
@@ -176,6 +206,9 @@ public:
 			case 75: // Влево
 				fig.hide();
 				fig.moveLeft();
+				if (fig.isCollision(vec)) {
+					fig.moveRight();
+				}
 				break;
 			}
 			//72 вверх
@@ -186,7 +219,7 @@ public:
 
 int main()
 {
-	//system("mode con cols=20 lines=16");
+	//system("mode con cols=30 lines=20");
 	setlocale(LC_ALL, "Russian"); //Включает Русский язык в С++
 	Game game;
 	game.run();
